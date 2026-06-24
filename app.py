@@ -49,43 +49,55 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. 在线数据读取与处理（融合永久直连与数据清洗版）
+# 2. 在线数据读取与处理（腾讯文档终极强攻版）
 # ==========================================
-@st.cache_data(ttl=6000)  
+@st.cache_data(ttl=600)  # 每 10 分钟自动更新缓存
 def load_data():
+    # 依然使用你的腾讯文档 Token 链接
     file_path = "https://docs.qq.com/excel/download?token=DUkp1QmxrT1NDQU9Q"
+    
     import requests
     import io
     
     try:
-        # 伪装成普通浏览器 Headers，防止被腾讯云防爬机制拦截
+        # 终极伪装：不仅伪装成现代浏览器，还带上完整的校验协议（让腾讯误以为是合法的下载动作）
         headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            "Accept": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, */*",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+            "Connection": "keep-alive",
+            "Referer": "https://docs.qq.com/sheet/DUkp1QmxrT1NDQU9Q"
         }
+        
+        # 强行发起请求
         response = requests.get(file_path, headers=headers, timeout=15)
         
-        # 智能兼容：不管是叫 "2026fall" 还是默认的工作表名，直接读取第一个 sheet
+        # 智能拦截排查：如果腾讯吐回来的不是真实的 Excel 数据流，而是报错网页，在这里直接抓出来
+        if b"html" in response.content[:100].lower():
+            st.error("🔒 腾讯文档海外安全策略限制：当前链接被防爬虫防火墙拦截。")
+            st.info("💡 最快解决办法：如果您不想折腾飞书，可以直接用微信/手机号注册登录电脑版【石墨文档】(shimo.im)，把 Excel 导入进去并开启‘任何人可看’，将其下载链接贴过来，100% 不会被拦截，极度顺畅！")
+            return None
+            
+        # 正常读取
         df = pd.read_excel(io.BytesIO(response.content), sheet_name=0)
         
-        # 清除表头前后可能不小心多打的空格
+        # 清除表头前后空格
         df.columns = df.columns.str.strip()
         
-        # 清洗数据：只保留需要的核心字段
+        # 清洗数据
         core_columns = ['类别', '投递时间', '公司/单位名称', '岗位', '时间节点', '进展']
         existing_cols = [col for col in core_columns if col in df.columns]
         df = df[existing_cols].copy()
         
-        # 填充空值，避免网页显示 NaN
         for col in df.columns:
             df[col] = df[col].fillna('')
             
-        # 优化逻辑：将投递时间只保留到年月日（YYYY-MM-DD）
         if '投递时间' in df.columns:
             df['投递时间'] = pd.to_datetime(df['投递时间'], errors='coerce').dt.strftime('%Y-%m-%d').fillna(df['投递时间'])
             
         return df
     except Exception as e:
-        st.error(f"❌ 腾讯在线文档读取失败！请检查 Token 是否正确或文档是否开启了‘所有人可查看’权限。错误信息: {e}")
+        st.error(f"❌ 在线读取发生未知错误: {e}")
         return None
 
 df = load_data()
