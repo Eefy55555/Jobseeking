@@ -49,16 +49,29 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. 本地数据读取与处理
+# 2. 在线数据读取与处理（融合永久直连与数据清洗版）
 # ==========================================
-@st.cache_data
+@st.cache_data(ttl=6000)  
 def load_data():
-    file_path = "https://docs-import-export-1251316161.cos.ap-guangzhou.myqcloud.com/export/docx/RJuBlkOSCAOP/version_0_144115226059951793.json_144115226059951793_1c05e9e8-eb65-c786-fce2-cc5ef23f1941.xlsx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKID8GWineS8xy0uqtmhiaKxNiuwtywncHya%2F20260624%2Fap-guangzhou%2Fs3%2Faws4_request&X-Amz-Date=20260624T023225Z&X-Amz-Expires=1800&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3Bfilename%3D%222026fall.xlsx%22%3Bfilename%2A%3DUTF-8%27%272026fall.xlsx&response-content-type=&X-Amz-Signature=720eb2024b66d5373bf3ba13aa0f1e3c997a92ea577ea48b649984b8d4a3c59b"  # 严格读取本地同文件夹下的 Excel
+    file_path = "https://docs.qq.com/excel/download?token=DUkp1QmxrT1NDQU9Q?tab=000001"
+    
+    import requests
+    import io
+    
     try:
-        # 明确只读取名为 "2026fall" 的第一个 sheet
-        df = pd.read_excel(file_path, sheet_name="2026fall")
+        # 伪装成普通浏览器 Headers，防止被腾讯云防爬机制拦截
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        response = requests.get(file_path, headers=headers, timeout=15)
         
-        # 清洗数据：只保留需要的 5 列核心字段
+        # 智能兼容：不管是叫 "2026fall" 还是默认的工作表名，直接读取第一个 sheet
+        df = pd.read_excel(io.BytesIO(response.content), sheet_name=0)
+        
+        # 清除表头前后可能不小心多打的空格
+        df.columns = df.columns.str.strip()
+        
+        # 清洗数据：只保留需要的核心字段
         core_columns = ['类别', '投递时间', '公司/单位名称', '岗位', '时间节点', '进展']
         existing_cols = [col for col in core_columns if col in df.columns]
         df = df[existing_cols].copy()
@@ -66,13 +79,14 @@ def load_data():
         # 填充空值，避免网页显示 NaN
         for col in df.columns:
             df[col] = df[col].fillna('')
+            
         # 优化逻辑：将投递时间只保留到年月日（YYYY-MM-DD）
         if '投递时间' in df.columns:
             df['投递时间'] = pd.to_datetime(df['投递时间'], errors='coerce').dt.strftime('%Y-%m-%d').fillna(df['投递时间'])
             
         return df
     except Exception as e:
-        st.error(f"本地 Excel 文件读取失败！请检查 `2026fall.xlsx` 是否与本程序放在同一个文件夹内。错误信息: {e}")
+        st.error(f"❌ 腾讯在线文档读取失败！请检查 Token 是否正确或文档是否开启了‘所有人可查看’权限。错误信息: {e}")
         return None
 
 df = load_data()
