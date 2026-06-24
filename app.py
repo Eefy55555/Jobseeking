@@ -49,22 +49,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. 在线数据读取与处理（飞书/公开直连终极无缝版）
+# 2. 本地数据读取与处理
 # ==========================================
-@st.cache_data(ttl=600)  # 每 10 分钟自动更新缓存，确保父母刷新能看到最新动态
+@st.cache_data
 def load_data():
-    # 完美的飞书公开直连格式
-    file_path = "https://qcns92zz60yw.feishu.cn/sheets/EUZ0sDCt6hDDNYtMCE9cGLSnnF5/download"
-
-    import requests
-    import io
+    # 💡 放弃网络直连，直接读取存放在同一个 GitHub 仓库下的 Excel 文件
+    file_path = "2026fall.xlsx"
     
     try:
-        # 标准网络请求
-        response = requests.get(file_path, timeout=15)
-        
-        # 直接读取第一个 sheet，无视工作表命名
-        df = pd.read_excel(io.BytesIO(response.content), sheet_name=0)
+        df = pd.read_excel(file_path, sheet_name=0)
         
         # 清除表头前后空格
         df.columns = df.columns.str.strip()
@@ -84,7 +77,7 @@ def load_data():
             
         return df
     except Exception as e:
-        st.error(f"❌ 在线表格读取失败！错误信息: {e}")
+        st.error(f"❌ 本地表格读取失败！请确保 2026fall.xlsx 已经上传到了 GitHub 仓库中。错误信息: {e}")
         return None
 
 df = load_data()
