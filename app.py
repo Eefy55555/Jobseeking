@@ -9,35 +9,41 @@ st.set_page_config(page_title="2026秋招进展汇报", page_icon="💼", layout
 
 # 注入自定义 CSS 调节字体和样式，确保长辈阅读舒适（字号偏大，行距适中）
 st.markdown("""
-    <style>
+        <style>
+    /* 基础全局字体与字号调整，更适合手机屏幕 */
     html, body, [class*="css"] {
         font-family: 'Calibri', 'PMingLiU', 'New MingLiU', '新细明体', sans-serif;
-        font-size: 18px;
+        font-size: 16px; /* 电脑和手机的通用基础字号，稍微调小 */
     }
+    
+    /* 数据大卡片（Metrics）的手机端瘦身 */
     .stMetric label {
-        font-size: 20px !important;
+        font-size: 16px !important; /* 指标名称字号调小 */
         font-weight: bold;
     }
     .stMetric div {
-        font-size: 35px !important;
+        font-size: 26px !important; /* 数字字号从 35px 缩减到 26px，防止在手机上折行 */
     }
+    
+    /* 手机端时间轴的紧凑排版 */
     .timeline-item {
-        padding: 15px;
+        padding: 10px 12px; /* 缩小内边距 */
         border-left: 3px solid #2e7d32;
-        margin-left: 10px;
-        margin-bottom: 15px;
+        margin-left: 5px;
+        margin-bottom: 10px;
         background-color: #f9f9f9;
-        border-radius: 0 8px 8px 0;
+        border-radius: 0 6px 6px 0;
     }
     .timeline-date {
         font-weight: bold;
         color: #2e7d32;
-        font-size: 17px;
+        font-size: 15px; /* 约定时间时点字号微调 */
     }
     .timeline-content {
-        margin-top: 5px;
+        margin-top: 3px;
         color: #333333;
-        font-size: 16px;
+        font-size: 14px; /* 核心内容字号微调 */
+        line-height: 1.4;
     }
     </style>
 """, unsafe_allow_html=True)
