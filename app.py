@@ -54,7 +54,7 @@ st.markdown("""
 @st.cache_data(ttl=600)  # 每 10 分钟自动更新缓存，确保父母刷新能看到最新动态
 def load_data():
     # 完美的飞书公开直连格式
-    file_path = "https://qcns92zz60yw.feisku.cn/sheets/EUZ0sDCt6hDDNYtMCE9cGLSnnF5/download"
+    file_path = "https://qcns92zz60yw.feishu.cn/sheets/EUZ0sDCt6hDDNYtMCE9cGLSnnF5/download"
 
     import requests
     import io
