@@ -3,13 +3,13 @@ import pandas as pd
 from datetime import datetime
 
 # ==========================================
-# 1. 页面基本配置与字体样式（新细明体 + Calibri）
+# 1. 页面基本配置与字体样式（移动端优化版）
 # ==========================================
 st.set_page_config(page_title="2026秋招进展汇报", page_icon="💼", layout="wide")
 
-# 注入自定义 CSS 调节字体和样式，确保长辈阅读舒适（字号偏大，行距适中）
+# 注入自定义 CSS 调节字体和样式，确保长辈在手机和电脑上阅读都舒适
 st.markdown("""
-        <style>
+    <style>
     /* 基础全局字体与字号调整，更适合手机屏幕 */
     html, body, [class*="css"] {
         font-family: 'Calibri', 'PMingLiU', 'New MingLiU', '新细明体', sans-serif;
@@ -22,7 +22,7 @@ st.markdown("""
         font-weight: bold;
     }
     .stMetric div {
-        font-size: 26px !important; /* 数字字号从 35px 缩减到 26px，防止在手机上折行 */
+        font-size: 26px !important; /* 数字字号缩减到 26px，防止在手机上折行 */
     }
     
     /* 手机端时间轴的紧凑排版 */
@@ -51,9 +51,10 @@ st.markdown("""
 # ==========================================
 # 2. 在线数据读取与处理（飞书/公开直连终极无缝版）
 # ==========================================
-@st.cache_data(ttl=600)  # 每 10 分钟自动更新缓存
+@st.cache_data(ttl=600)  # 每 10 分钟自动更新缓存，确保父母刷新能看到最新动态
 def load_data():
-    file_path = "https://qcns92zz60yw.feishu.cn/sheets/EUZ0sDCt6hDDNYtMCE9cGLSnnF5/download"
+    # 完美的飞书公开直连格式
+    file_path = "https://qcns92zz60yw.feisku.cn/sheets/EUZ0sDCt6hDDNYtMCE9cGLSnnF5/download"
 
     import requests
     import io
@@ -104,9 +105,9 @@ if df is not None:
     st.title("💼 2026秋招求职进展汇报小站")
     st.subheader("给最亲爱的爸爸妈妈：我会及时向你们更新动态，不用担心哦！")
     
-    # 展现本地最新的同步时间，本地保存后刷新网页即刻更新
+    # 展现云端最新的同步时间
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    st.caption(f"⏱️ 本地数据最近一次刷新同步时间：{current_time}")
+    st.caption(f"⏱️ 网页数据最近一次刷新时间：{current_time}")
     st.write("---")
 
     # 渲染大卡片
@@ -121,11 +122,11 @@ if df is not None:
     st.write("---")
 
     # ==========================================
-    # 4. 一键复制微信汇报文本
+    # 4. 精美布告栏简报展示
     # ==========================================
     st.subheader("💬 简报")
     
-    # 筛选出最近有最新“进展”的2家单位放入微信草稿
+    # 筛选出最近有最新“进展”的2家单位放入草稿
     recent_updates = df[df['进展'] != ''].head(2)
     update_text = ""
     for idx, row in recent_updates.iterrows():
@@ -141,7 +142,7 @@ if df is not None:
 {update_text if update_text else '- 各项投递正在稳步推进，等待进一步通知；'}
 我会继续努力的，你们在家里也要照顾好身体，不用为我担心！🥰"""
 
-    # 优化逻辑：将复制框改为精美的文字布告栏（使用带有提示色块的 info 样式）
+    # 展示为像布告栏一样的纯文字精美提示框
     st.info(report_template)
 
     st.write("---")
@@ -179,4 +180,3 @@ if df is not None:
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            
