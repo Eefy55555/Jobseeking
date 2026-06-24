@@ -53,8 +53,7 @@ st.markdown("""
 # ==========================================
 @st.cache_data(ttl=6000)  
 def load_data():
-    file_path = "https://docs.qq.com/excel/download?token=DUkp1QmxrT1NDQU9Q?tab=000001"
-    
+    file_path = "https://docs.qq.com/excel/download?token=DUkp1QmxrT1NDQU9Q"
     import requests
     import io
     
