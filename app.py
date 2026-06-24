@@ -53,8 +53,8 @@ st.markdown("""
 # ==========================================
 @st.cache_data(ttl=600)  # 每 10 分钟自动更新缓存
 def load_data():
-    file_path = "https://qcns92zz60yw.feishu.cn/sheets/EUZ0sDCt6hDDNYtMCE9cGLSnnF5?from=from_copylink/download"
-    
+    file_path = "https://qcns92zz60yw.feishu.cn/sheets/EUZ0sDCt6hDDNYtMCE9cGLSnnF5/download"
+
     import requests
     import io
     
